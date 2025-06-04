@@ -155,6 +155,116 @@
                 min-width: unset;
             }
         }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 25px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .hamburger span {
+            display: block;
+            height: 3px;
+            background: #333;
+            border-radius: 2px;
+        }
+        .hamburger.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+        .nav-links.open {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                background: #fff;
+                position: absolute;
+                top: 60px;
+                right: 0;
+                width: 100%;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .nav-links li {
+                text-align: center;
+                padding: 10px 0;
+            }
+        }
+        footer {
+            background-color: #f1f1f1;
+            padding: 2rem 1rem;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        .footer-section p, .footer-section ul, .footer-section li {
+            font-size: 0.95rem;
+            color: #555;
+        }
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        .footer-section ul li a {
+            text-decoration: none;
+            color: #3498db;
+        }
+        .footer-section ul li a:hover {
+            text-decoration: underline;
+        }
+        .footer-socials {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .footer-socials a {
+            display: inline-block;
+            color: #555;
+            transition: color 0.3s;
+        }
+        .footer-socials a:hover {
+            color: #3498db;
+        }
+        .footer-bottom {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: #777;
+        }
+        .footer-bottom a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .footer-bottom a:hover {
+            text-decoration: underline;
+        }
     </style>
     <!-- html2pdf.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -162,7 +272,12 @@
 <body>
     <nav class="navbar">
         <div class="logo">Easy CV</div>
-        <ul class="nav-links">
+        <div class="hamburger" id="hamburger-menu" aria-label="Ouvrir le menu" tabindex="0">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul class="nav-links" id="nav-links">
             <li><a href="index.html">Accueil</a></li>
             <li><a href="#">Modèles</a></li>
             <li><a href="#">Comment ça marche</a></li>
@@ -170,6 +285,20 @@
             <li><a href="#" class="nav-button">Créer mon CV</a></li>
         </ul>
     </nav>
+    <div class="cv-layout-choice" style="max-width:1200px;margin:2rem auto 0 auto;text-align:center;">
+        <h2>Choisissez un modèle de mise en page</h2>
+        <div class="cv-layouts" style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;">
+            <div class="cv-layout-thumb selected" data-layout="classic" tabindex="0" style="border:2px solid #2ecc71;border-radius:8px;padding:1rem;cursor:pointer;transition:.2s;">
+                <div style="width:120px;height:160px;background:#fff;border-radius:6px;box-shadow:0 2px 8px #0001;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#2ecc71;">Classique</div>
+            </div>
+            <div class="cv-layout-thumb" data-layout="modern" tabindex="0" style="border:2px solid #eee;border-radius:8px;padding:1rem;cursor:pointer;transition:.2s;">
+                <div style="width:120px;height:160px;background:linear-gradient(135deg,#2ecc71 60%,#fff 100%);border-radius:6px;box-shadow:0 2px 8px #0001;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#222;">Moderne</div>
+            </div>
+            <div class="cv-layout-thumb" data-layout="side" tabindex="0" style="border:2px solid #eee;border-radius:8px;padding:1rem;cursor:pointer;transition:.2s;">
+                <div style="width:120px;height:160px;background:#f9f9f9;border-radius:6px;box-shadow:0 2px 8px #0001;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#27ae60;">Colonne</div>
+            </div>
+        </div>
+    </div>
     <div class="cv-creator-container">
         <form class="cv-form" id="cv-form">
             <div class="color-selection">
@@ -308,60 +437,182 @@
             // Langues
             const langues = document.getElementById('langues').value.split(',').map(s => s.trim()).filter(Boolean);
 
-            // Génération du HTML du CV
-            let html = `<div class="cv-main" style="--cvcolor:${selectedColor}">
-                <div class="cv-header">
-                    <div class="cv-header-info">
-                        <div class="cv-name">${prenom} ${nom}</div>
-                        <div class="cv-title">${titre}</div>
-                        <div class="cv-contact">
-                            ${adresse ? `<span>${adresse}</span> | ` : ''}
-                            ${email ? `<span>${email}</span> | ` : ''}
-                            ${telephone ? `<span>${telephone}</span>` : ''}
-                        </div>
-                    </div>
-                </div>
-                <div class="cv-section">
-                    <div class="cv-section-title">Expériences Professionnelles</div>
-                    ${experiences.length ? experiences.map(exp => `
-                        <div class="cv-block">
-                            <div>
-                                <span class="cv-block-title">${exp.poste}</span>
-                                <span class="cv-block-date">${exp.dates}</span>
+            let html = "";
+            if (selectedLayout === "classic") {
+                html = `<div class="cv-main" style="--cvcolor:${selectedColor}">
+                    <div class="cv-header">
+                        <div class="cv-header-info">
+                            <div class="cv-name">${prenom} ${nom}</div>
+                            <div class="cv-title">${titre}</div>
+                            <div class="cv-contact">
+                                ${adresse ? `<span>${adresse}</span> | ` : ''}
+                                ${email ? `<span>${email}</span> | ` : ''}
+                                ${telephone ? `<span>${telephone}</span>` : ''}
                             </div>
-                            <div><strong>${exp.entreprise}</strong>${exp.lieu ? `, ${exp.lieu}` : ''}</div>
-                            <div class="cv-block-desc">${exp.desc}</div>
                         </div>
-                    `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune expérience renseignée.</div>'}
-                </div>
-                <div class="cv-section">
-                    <div class="cv-section-title">Formations</div>
-                    ${educations.length ? educations.map(edu => `
-                        <div class="cv-block">
-                            <div>
-                                <span class="cv-block-title">${edu.diplome}</span>
-                                <span class="cv-block-date">${edu.dates}</span>
+                    </div>
+                    <div class="cv-section">
+                        <div class="cv-section-title">Expériences Professionnelles</div>
+                        ${experiences.length ? experiences.map(exp => `
+                            <div class="cv-block">
+                                <div>
+                                    <span class="cv-block-title">${exp.poste}</span>
+                                    <span class="cv-block-date">${exp.dates}</span>
+                                </div>
+                                <div><strong>${exp.entreprise}</strong>${exp.lieu ? `, ${exp.lieu}` : ''}</div>
+                                <div class="cv-block-desc">${exp.desc}</div>
                             </div>
-                            <div><strong>${edu.etablissement}</strong>${edu.lieu ? `, ${edu.lieu}` : ''}</div>
-                            <div class="cv-block-desc">${edu.desc}</div>
+                        `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune expérience renseignée.</div>'}
+                    </div>
+                    <div class="cv-section">
+                        <div class="cv-section-title">Formations</div>
+                        ${educations.length ? educations.map(edu => `
+                            <div class="cv-block">
+                                <div>
+                                    <span class="cv-block-title">${edu.diplome}</span>
+                                    <span class="cv-block-date">${edu.dates}</span>
+                                </div>
+                                <div><strong>${edu.etablissement}</strong>${edu.lieu ? `, ${edu.lieu}` : ''}</div>
+                                <div class="cv-block-desc">${edu.desc}</div>
+                            </div>
+                        `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune formation renseignée.</div>'}
+                    </div>
+                    <div class="cv-section">
+                        <div class="cv-section-title">Compétences</div>
+                        <div class="cv-skills">
+                            ${competences.length ? competences.map(skill => `<span class="cv-skill">${skill}</span>`).join('') : '<span style="color:#aaa;">Aucune compétence renseignée.</span>'}
                         </div>
-                    `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune formation renseignée.</div>'}
-                </div>
-                <div class="cv-section">
-                    <div class="cv-section-title">Compétences</div>
-                    <div class="cv-skills">
-                        ${competences.length ? competences.map(skill => `<span class="cv-skill">${skill}</span>`).join('') : '<span style="color:#aaa;">Aucune compétence renseignée.</span>'}
                     </div>
-                </div>
-                <div class="cv-section">
-                    <div class="cv-section-title">Langues</div>
-                    <div class="cv-langs">
-                        ${langues.length ? langues.map(lang => `<span class="cv-lang">${lang}</span>`).join('') : '<span style="color:#aaa;">Aucune langue renseignée.</span>'}
+                    <div class="cv-section">
+                        <div class="cv-section-title">Langues</div>
+                        <div class="cv-langs">
+                            ${langues.length ? langues.map(lang => `<span class="cv-lang">${lang}</span>`).join('') : '<span style="color:#aaa;">Aucune langue renseignée.</span>'}
+                        </div>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
+            } else if (selectedLayout === "modern") {
+                html = `<div class="cv-main cv-modern" style="--cvcolor:${selectedColor};background:linear-gradient(120deg,#fff 60%,${selectedColor}11 100%);">
+                    <div class="cv-header" style="border-bottom:3px solid var(--cvcolor);">
+                        <div class="cv-header-info">
+                            <div class="cv-name" style="font-size:2.5rem;">${prenom} ${nom}</div>
+                            <div class="cv-title" style="font-size:1.2rem;color:var(--cvcolor);">${titre}</div>
+                            <div class="cv-contact" style="margin-top:0.5rem;">
+                                ${adresse ? `<span>${adresse}</span> | ` : ''}
+                                ${email ? `<span>${email}</span> | ` : ''}
+                                ${telephone ? `<span>${telephone}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cv-section" style="margin-top:2rem;">
+                        <div class="cv-section-title" style="border-left:0;border-bottom:2px solid var(--cvcolor);padding-left:0;padding-bottom:0.3rem;">Expériences</div>
+                        ${experiences.length ? experiences.map(exp => `
+                            <div class="cv-block" style="margin-bottom:0.7rem;">
+                                <div>
+                                    <span class="cv-block-title" style="color:var(--cvcolor);">${exp.poste}</span>
+                                    <span class="cv-block-date">${exp.dates}</span>
+                                </div>
+                                <div><strong>${exp.entreprise}</strong>${exp.lieu ? `, ${exp.lieu}` : ''}</div>
+                                <div class="cv-block-desc">${exp.desc}</div>
+                            </div>
+                        `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune expérience renseignée.</div>'}
+                    </div>
+                    <div class="cv-section">
+                        <div class="cv-section-title" style="border-left:0;border-bottom:2px solid var(--cvcolor);padding-left:0;padding-bottom:0.3rem;">Formations</div>
+                        ${educations.length ? educations.map(edu => `
+                            <div class="cv-block" style="margin-bottom:0.7rem;">
+                                <div>
+                                    <span class="cv-block-title" style="color:var(--cvcolor);">${edu.diplome}</span>
+                                    <span class="cv-block-date">${edu.dates}</span>
+                                </div>
+                                <div><strong>${edu.etablissement}</strong>${edu.lieu ? `, ${edu.lieu}` : ''}</div>
+                                <div class="cv-block-desc">${edu.desc}</div>
+                            </div>
+                        `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune formation renseignée.</div>'}
+                    </div>
+                    <div class="cv-section">
+                        <div class="cv-section-title" style="border-left:0;border-bottom:2px solid var(--cvcolor);padding-left:0;padding-bottom:0.3rem;">Compétences</div>
+                        <div class="cv-skills" style="justify-content:center;">
+                            ${competences.length ? competences.map(skill => `<span class="cv-skill" style="background:var(--cvcolor);color:#fff;">${skill}</span>`).join('') : '<span style="color:#aaa;">Aucune compétence renseignée.</span>'}
+                        </div>
+                    </div>
+                    <div class="cv-section">
+                        <div class="cv-section-title" style="border-left:0;border-bottom:2px solid var(--cvcolor);padding-left:0;padding-bottom:0.3rem;">Langues</div>
+                        <div class="cv-langs" style="justify-content:center;">
+                            ${langues.length ? langues.map(lang => `<span class="cv-lang" style="background:var(--cvcolor);color:#fff;">${lang}</span>`).join('') : '<span style="color:#aaa;">Aucune langue renseignée.</span>'}
+                        </div>
+                    </div>
+                </div>`;
+            } else if (selectedLayout === "side") {
+                html = `<div class="cv-main cv-side" style="--cvcolor:${selectedColor};display:flex;flex-direction:row;gap:2rem;">
+                    <div style="flex:1.1;background:var(--cvcolor);color:#fff;border-radius:8px 0 0 8px;padding:2rem 1rem;display:flex;flex-direction:column;align-items:center;">
+                        <div class="cv-name" style="font-size:2rem;color:#fff;">${prenom} ${nom}</div>
+                        <div class="cv-title" style="font-size:1.1rem;color:#e5ffe5;">${titre}</div>
+                        <div class="cv-contact" style="margin-top:1rem;font-size:0.98rem;">
+                            ${adresse ? `<div>${adresse}</div>` : ''}
+                            ${email ? `<div>${email}</div>` : ''}
+                            ${telephone ? `<div>${telephone}</div>` : ''}
+                        </div>
+                        <div class="cv-section" style="margin-top:2rem;">
+                            <div class="cv-section-title" style="color:#fff;border:none;padding-left:0;">Compétences</div>
+                            <div class="cv-skills" style="flex-wrap:wrap;justify-content:center;">
+                                ${competences.length ? competences.map(skill => `<span class="cv-skill" style="background:#fff;color:var(--cvcolor);margin:2px 4px;">${skill}</span>`).join('') : '<span style="color:#eee;">Aucune compétence</span>'}
+                            </div>
+                        </div>
+                        <div class="cv-section">
+                            <div class="cv-section-title" style="color:#fff;border:none;padding-left:0;">Langues</div>
+                            <div class="cv-langs" style="flex-wrap:wrap;justify-content:center;">
+                                ${langues.length ? langues.map(lang => `<span class="cv-lang" style="background:#fff;color:var(--cvcolor);margin:2px 4px;">${lang}</span>`).join('') : '<span style="color:#eee;">Aucune langue</span>'}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="flex:2;padding:2rem 1rem;">
+                        <div class="cv-section">
+                            <div class="cv-section-title" style="border-left:4px solid var(--cvcolor);color:var(--cvcolor);">Expériences</div>
+                            ${experiences.length ? experiences.map(exp => `
+                                <div class="cv-block">
+                                    <div>
+                                        <span class="cv-block-title">${exp.poste}</span>
+                                        <span class="cv-block-date">${exp.dates}</span>
+                                    </div>
+                                    <div><strong>${exp.entreprise}</strong>${exp.lieu ? `, ${exp.lieu}` : ''}</div>
+                                    <div class="cv-block-desc">${exp.desc}</div>
+                                </div>
+                            `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune expérience renseignée.</div>'}
+                        </div>
+                        <div class="cv-section">
+                            <div class="cv-section-title" style="border-left:4px solid var(--cvcolor);color:var(--cvcolor);">Formations</div>
+                            ${educations.length ? educations.map(edu => `
+                                <div class="cv-block">
+                                    <div>
+                                        <span class="cv-block-title">${edu.diplome}</span>
+                                        <span class="cv-block-date">${edu.dates}</span>
+                                    </div>
+                                    <div><strong>${edu.etablissement}</strong>${edu.lieu ? `, ${edu.lieu}` : ''}</div>
+                                    <div class="cv-block-desc">${edu.desc}</div>
+                                </div>
+                            `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune formation renseignée.</div>'}
+                        </div>
+                    </div>
+                </div>`;
+            }
             document.getElementById('cv-preview-content').innerHTML = html;
         }
+
+        // Layout selection logic
+        let selectedLayout = "classic";
+        document.querySelectorAll('.cv-layout-thumb').forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                document.querySelectorAll('.cv-layout-thumb').forEach(t => t.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedLayout = this.getAttribute('data-layout');
+                updatePreview();
+            });
+            thumb.addEventListener('keydown', function(e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    this.click();
+                }
+            });
+        });
 
         // Ajout dynamique d'expériences et formations
         function addExperienceBlock(data = {}) {
@@ -407,6 +658,11 @@
                 alert("Veuillez remplir le formulaire pour générer votre CV avant de le télécharger.");
                 return;
             }
+            // Fixe la largeur du CV pour le PDF (A4 portrait)
+            cvMain.style.width = "794px";
+            cvMain.style.maxWidth = "794px";
+            cvMain.style.minWidth = "0";
+            cvMain.style.boxSizing = "border-box";
             // Optionnel : scroll dans le preview pour éviter les bugs de rendu
             cvMain.scrollIntoView({block: "center"});
             const opt = {
@@ -416,14 +672,45 @@
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'pt', format: 'a4', orientation: 'portrait' }
             };
-            html2pdf().set(opt).from(cvMain).save();
+            html2pdf().set(opt).from(cvMain).save().then(() => {
+                // Restaure la largeur responsive après le téléchargement
+                cvMain.style.width = "";
+                cvMain.style.maxWidth = "";
+                cvMain.style.minWidth = "";
+                cvMain.style.boxSizing = "";
+            });
         };
+
+        // Hamburger menu JS
+        const hamburger = document.getElementById('hamburger-menu');
+        const navLinks = document.getElementById('nav-links');
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('open');
+                navLinks.classList.remove('open');
+            });
+        });
     </script>
     <footer>
         <div class="footer-content">
             <div class="footer-section">
                 <h3>À propos</h3>
                 <p>Easy CV est votre partenaire pour créer des CV professionnels gratuitement.</p>
+                <div class="footer-socials">
+                    <a href="https://facebook.com" target="_blank" aria-label="Facebook">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.595 0 0 .592 0 1.326v21.348C0 23.406.595 24 1.325 24H12.82v-9.294H9.692v-3.622h3.127V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.324-.594 1.324-1.326V1.326C24 .592 23.405 0 22.675 0"></path></svg>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" aria-label="Twitter">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557a9.93 9.93 0 0 1-2.828.775 4.932 4.932 0 0 0 2.165-2.724c-.951.564-2.005.974-3.127 1.195a4.916 4.916 0 0 0-8.38 4.482C7.691 8.095 4.066 6.13 1.64 3.161c-.542.929-.856 2.01-.857 3.17 0 2.188 1.115 4.116 2.823 5.247a4.904 4.904 0 0 1-2.229-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 0 1-2.224.084c.627 1.956 2.444 3.377 4.6 3.417A9.867 9.867 0 0 1 0 21.543a13.94 13.94 0 0 0 7.548 2.209c9.058 0 14.009-7.496 14.009-13.986 0-.21 0-.423-.016-.634A9.936 9.936 0 0 0 24 4.557z"></path></svg>
+                    </a>
+                    <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11.75 20h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm15.25 11.268h-3v-5.604c0-1.337-.025-3.062-1.867-3.062-1.868 0-2.154 1.459-2.154 2.967v5.699h-3v-10h2.881v1.367h.041c.401-.761 1.379-1.563 2.841-1.563 3.039 0 3.6 2.001 3.6 4.599v5.597z"></path></svg>
+                    </a>
+                </div>
             </div>
             <div class="footer-section">
                 <h3>Liens rapides</h3>
@@ -438,7 +725,6 @@
                 <h3>Contact</h3>
                 <ul>
                     <li>Email: contact@easy-cv.fr</li>
-                    <li>Suivez-nous sur les réseaux</li>
                 </ul>
             </div>
         </div>
@@ -448,3 +734,4 @@
     </footer>
 </body>
 </html>
+
