@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créateur de CV</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .cv-creator-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+        }
+        .cv-form {
+            width: 40%;
+            min-width: 320px;
+        }
+        .cv-preview {
+            width: 60%;
+            min-width: 320px;
+            border: 1px solid #eee;
+            padding: 2rem;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .form-group textarea {
+            resize: vertical;
+        }
+        .color-selection {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .color-option {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 0 0.5rem;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color-option.selected {
+            border-color: #333;
+        }
+        /* CV Styles */
+        .cv-main {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 2rem 2.5rem;
+            font-family: 'Arial', sans-serif;
+        }
+        .cv-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--cvcolor, #2ecc71);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .cv-header-info {
+            flex: 1;
+        }
+        .cv-name {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--cvcolor, #2ecc71);
+            margin-bottom: 0.2rem;
+        }
+        .cv-title {
+            font-size: 1.1rem;
+            color: #444;
+            margin-bottom: 0.5rem;
+        }
+        .cv-contact {
+            font-size: 0.98rem;
+            color: #333;
+        }
+        .cv-section {
+            margin-bottom: 1.5rem;
+        }
+        .cv-section-title {
+            color: var(--cvcolor, #2ecc71);
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.7rem;
+            border-left: 4px solid var(--cvcolor, #2ecc71);
+            padding-left: 0.5rem;
+        }
+        .cv-list {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+        .cv-list li {
+            margin-bottom: 0.5rem;
+        }
+        .cv-block {
+            margin-bottom: 1rem;
+        }
+        .cv-block-title {
+            font-weight: bold;
+            color: #222;
+        }
+        .cv-block-date {
+            font-size: 0.95rem;
+            color: #888;
+            float: right;
+        }
+        .cv-block-desc {
+            font-size: 0.98rem;
+            color: #444;
+            margin-top: 0.2rem;
+        }
+        .cv-skills, .cv-langs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1rem;
+        }
+        .cv-skill, .cv-lang {
+            background: var(--cvcolor, #2ecc71);
+            color: #fff;
+            border-radius: 3px;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.98rem;
+        }
+        @media (max-width: 900px) {
+            .cv-creator-container {
+                flex-direction: column;
+            }
+            .cv-form, .cv-preview {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Easy CV</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="#">Modèles</a></li>
+            <li><a href="#">Comment ça marche</a></li>
+            <li><a href="#">Conseils</a></li>
+            <li><a href="#" class="nav-button">Créer mon CV</a></li>
+        </ul>
+    </nav>
+    <div class="cv-creator-container">
+        <form class="cv-form" id="cv-form">
+            <div class="color-selection">
+                <h3>Choisissez la couleur de votre CV :</h3>
+                <div class="color-option selected" data-color="#2ecc71" style="background-color: #2ecc71;"></div>
+                <div class="color-option" data-color="#3498db" style="background-color: #3498db;"></div>
+                <div class="color-option" data-color="#e74c3c" style="background-color: #e74c3c;"></div>
+                <div class="color-option" data-color="#f39c12" style="background-color: #f39c12;"></div>
+            </div>
+            <h2>Informations Personnelles</h2>
+            <div class="form-group">
+                <label for="prenom">Prénom</label>
+                <input type="text" id="prenom" name="prenom" required>
+            </div>
+            <div class="form-group">
+                <label for="nom">Nom</label>
+                <input type="text" id="nom" name="nom" required>
+            </div>
+            <div class="form-group">
+                <label for="titre">Titre du poste</label>
+                <input type="text" id="titre" name="titre" placeholder="ex: Développeur Web">
+            </div>
+            <div class="form-group">
+                <label for="adresse">Adresse</label>
+                <input type="text" id="adresse" name="adresse">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="telephone">Téléphone</label>
+                <input type="tel" id="telephone" name="telephone">
+            </div>
+            <h2>Expériences Professionnelles</h2>
+            <div id="experiences-list"></div>
+            <button type="button" class="cta-button" id="add-experience">Ajouter une expérience</button>
+            <h2>Formations</h2>
+            <div id="educations-list"></div>
+            <button type="button" class="cta-button" id="add-education">Ajouter une formation</button>
+            <h2>Compétences</h2>
+            <div class="form-group">
+                <label for="competences">Compétences (séparées par une virgule)</label>
+                <input type="text" id="competences" name="competences" placeholder="HTML, CSS, JavaScript, ...">
+            </div>
+            <h2>Langues</h2>
+            <div class="form-group">
+                <label for="langues">Langues (séparées par une virgule)</label>
+                <input type="text" id="langues" name="langues" placeholder="Français, Anglais, ...">
+            </div>
+            <button type="button" id="download-cv" class="cta-button" style="margin-top:2rem;">Télécharger mon CV (PDF)</button>
+        </form>
+        <div class="cv-preview">
+            <div id="cv-preview-content">
+                <!-- Aperçu du CV généré ici -->
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- Color selection ---
+        let selectedColor = "#2ecc71";
+        document.querySelectorAll('.color-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedColor = this.dataset.color;
+                updatePreview();
+            });
+        });
+
+        // --- Dynamic Experience/Education blocks ---
+        function createExperienceBlock(index = null, data = {}) {
+            return `
+            <div class="exp-block form-group" data-index="${index !== null ? index : ''}">
+                <label>Poste</label>
+                <input type="text" class="exp-poste" value="${data.poste || ''}" required>
+                <label>Entreprise</label>
+                <input type="text" class="exp-entreprise" value="${data.entreprise || ''}" required>
+                <label>Lieu</label>
+                <input type="text" class="exp-lieu" value="${data.lieu || ''}">
+                <label>Dates</label>
+                <input type="text" class="exp-dates" value="${data.dates || ''}" placeholder="ex: 2022 - 2023">
+                <label>Description</label>
+                <textarea class="exp-desc" rows="2">${data.desc || ''}</textarea>
+                <button type="button" class="remove-exp cta-button" style="background:#e74c3c;margin-top:0.5rem;">Supprimer</button>
+            </div>`;
+        }
+        function createEducationBlock(index = null, data = {}) {
+            return `
+            <div class="edu-block form-group" data-index="${index !== null ? index : ''}">
+                <label>Diplôme</label>
+                <input type="text" class="edu-diplome" value="${data.diplome || ''}" required>
+                <label>Établissement</label>
+                <input type="text" class="edu-etablissement" value="${data.etablissement || ''}" required>
+                <label>Lieu</label>
+                <input type="text" class="edu-lieu" value="${data.lieu || ''}">
+                <label>Dates</label>
+                <input type="text" class="edu-dates" value="${data.dates || ''}" placeholder="ex: 2020 - 2022">
+                <label>Description</label>
+                <textarea class="edu-desc" rows="2">${data.desc || ''}</textarea>
+                <button type="button" class="remove-edu cta-button" style="background:#e74c3c;margin-top:0.5rem;">Supprimer</button>
+            </div>`;
+        }
+        function getExperiences() {
+            return Array.from(document.querySelectorAll('.exp-block')).map(block => ({
+                poste: block.querySelector('.exp-poste').value,
+                entreprise: block.querySelector('.exp-entreprise').value,
+                lieu: block.querySelector('.exp-lieu').value,
+                dates: block.querySelector('.exp-dates').value,
+                desc: block.querySelector('.exp-desc').value
+            }));
+        }
+        function getEducations() {
+            return Array.from(document.querySelectorAll('.edu-block')).map(block => ({
+                diplome: block.querySelector('.edu-diplome').value,
+                etablissement: block.querySelector('.edu-etablissement').value,
+                lieu: block.querySelector('.edu-lieu').value,
+                dates: block.querySelector('.edu-dates').value,
+                desc: block.querySelector('.edu-desc').value
+            }));
+        }
+        function updatePreview() {
+            // Infos personnelles
+            const prenom = document.getElementById('prenom').value;
+            const nom = document.getElementById('nom').value;
+            const titre = document.getElementById('titre').value;
+            const adresse = document.getElementById('adresse').value;
+            const email = document.getElementById('email').value;
+            const telephone = document.getElementById('telephone').value;
+            // Expériences
+            const experiences = getExperiences();
+            // Formations
+            const educations = getEducations();
+            // Compétences
+            const competences = document.getElementById('competences').value.split(',').map(s => s.trim()).filter(Boolean);
+            // Langues
+            const langues = document.getElementById('langues').value.split(',').map(s => s.trim()).filter(Boolean);
+
+            // Génération du HTML du CV
+            let html = `<div class="cv-main" style="--cvcolor:${selectedColor}">
+                <div class="cv-header">
+                    <div class="cv-header-info">
+                        <div class="cv-name">${prenom} ${nom}</div>
+                        <div class="cv-title">${titre}</div>
+                        <div class="cv-contact">
+                            ${adresse ? `<span>${adresse}</span> | ` : ''}
+                            ${email ? `<span>${email}</span> | ` : ''}
+                            ${telephone ? `<span>${telephone}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="cv-section">
+                    <div class="cv-section-title">Expériences Professionnelles</div>
+                    ${experiences.length ? experiences.map(exp => `
+                        <div class="cv-block">
+                            <div>
+                                <span class="cv-block-title">${exp.poste}</span>
+                                <span class="cv-block-date">${exp.dates}</span>
+                            </div>
+                            <div><strong>${exp.entreprise}</strong>${exp.lieu ? `, ${exp.lieu}` : ''}</div>
+                            <div class="cv-block-desc">${exp.desc}</div>
+                        </div>
+                    `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune expérience renseignée.</div>'}
+                </div>
+                <div class="cv-section">
+                    <div class="cv-section-title">Formations</div>
+                    ${educations.length ? educations.map(edu => `
+                        <div class="cv-block">
+                            <div>
+                                <span class="cv-block-title">${edu.diplome}</span>
+                                <span class="cv-block-date">${edu.dates}</span>
+                            </div>
+                            <div><strong>${edu.etablissement}</strong>${edu.lieu ? `, ${edu.lieu}` : ''}</div>
+                            <div class="cv-block-desc">${edu.desc}</div>
+                        </div>
+                    `).join('') : '<div class="cv-block-desc" style="color:#aaa;">Aucune formation renseignée.</div>'}
+                </div>
+                <div class="cv-section">
+                    <div class="cv-section-title">Compétences</div>
+                    <div class="cv-skills">
+                        ${competences.length ? competences.map(skill => `<span class="cv-skill">${skill}</span>`).join('') : '<span style="color:#aaa;">Aucune compétence renseignée.</span>'}
+                    </div>
+                </div>
+                <div class="cv-section">
+                    <div class="cv-section-title">Langues</div>
+                    <div class="cv-langs">
+                        ${langues.length ? langues.map(lang => `<span class="cv-lang">${lang}</span>`).join('') : '<span style="color:#aaa;">Aucune langue renseignée.</span>'}
+                    </div>
+                </div>
+            </div>`;
+            document.getElementById('cv-preview-content').innerHTML = html;
+        }
+
+        // Ajout dynamique d'expériences et formations
+        function addExperienceBlock(data = {}) {
+            const container = document.getElementById('experiences-list');
+            container.insertAdjacentHTML('beforeend', createExperienceBlock(null, data));
+            updatePreview();
+        }
+        function addEducationBlock(data = {}) {
+            const container = document.getElementById('educations-list');
+            container.insertAdjacentHTML('beforeend', createEducationBlock(null, data));
+            updatePreview();
+        }
+        document.getElementById('add-experience').onclick = () => addExperienceBlock();
+        document.getElementById('add-education').onclick = () => addEducationBlock();
+
+        // Suppression dynamique
+        document.getElementById('experiences-list').addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-exp')) {
+                e.target.parentElement.remove();
+                updatePreview();
+            }
+        });
+        document.getElementById('educations-list').addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-edu')) {
+                e.target.parentElement.remove();
+                updatePreview();
+            }
+        });
+
+        // Mise à jour du preview à chaque changement
+        document.getElementById('cv-form').addEventListener('input', updatePreview);
+
+        // Initialisation preview
+        addExperienceBlock();
+        addEducationBlock();
+        updatePreview();
+
+        // --- Téléchargement PDF ---
+        document.getElementById('download-cv').onclick = function() {
+            updatePreview(); // S'assure que le contenu est à jour
+            const cvMain = document.querySelector('#cv-preview-content .cv-main');
+            if (!cvMain) {
+                alert("Veuillez remplir le formulaire pour générer votre CV avant de le télécharger.");
+                return;
+            }
+            // Optionnel : scroll dans le preview pour éviter les bugs de rendu
+            cvMain.scrollIntoView({block: "center"});
+            const opt = {
+                margin:       0,
+                filename:     'cv.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'pt', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(cvMain).save();
+        };
+    </script>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>À propos</h3>
+                <p>Easy CV est votre partenaire pour créer des CV professionnels gratuitement.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Liens rapides</h3>
+                <ul>
+                    <li><a href="#">Accueil</a></li>
+                    <li><a href="#">Modèles de CV</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <ul>
+                    <li>Email: contact@easy-cv.fr</li>
+                    <li>Suivez-nous sur les réseaux</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Easy CV - Tous droits réservés | <a href="#">Mentions légales</a> | <a href="#">Contact</a>
+        </div>
+    </footer>
+</body>
+</html>
